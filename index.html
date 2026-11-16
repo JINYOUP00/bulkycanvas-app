@@ -498,7 +498,7 @@ function strokeData(k, W, H){
   });
 }
 // ── 조각 방식 그림 (영상 그대로판): base.jpg + 붓질마다 바뀐 부분 pNNN.jpg(상자 box) + mNNN.png(자리·칠해진 순서) ──
-const MARGIN = 0.12;            // 완성 그림 사방 여백 (화면 가로 폭 대비) — 작가 확인
+const MARGIN = 0.05;            // 좌우 여백 (화면 가로 폭 대비, 한쪽) — 작가 결정 2026-11-16: 좌우 기준 5%씩, 프레임 느낌만
 const TOP_UI = 110, BOT_UI = 210; // 위(제목·단계)·아래(설명·버튼)에 가려지는 높이
 const isPatch = () => D && D.fmt === 'patch';
 // 물감이 있는 곳(content)이 위·아래 글자를 피해 가운데 오도록, 사방 여백을 두고 그림을 놓는다
@@ -507,9 +507,10 @@ function layoutStack(){
   if (!st || !isPatch()) return;
   const W = D.w, H = D.h, c = D.content || [0, 0, W, H];
   const cw = cv.clientWidth, chh = cv.clientHeight;
-  const m = cw * MARGIN, aw = cw - 2*m, ah = chh - TOP_UI - BOT_UI - 2*m;
-  const s = Math.max(0.05, Math.min(aw / c[2], ah / c[3]));
-  const cx = cw / 2, cy = TOP_UI + m + ah / 2;
+  // 그림 크기는 좌우 여백으로 정한다 (가로 = 화면의 90%). 세로가 너무 길면 화면 안에 들어오게만 줄인다.
+  const m = cw * MARGIN, aw = cw - 2*m, ah = chh - TOP_UI - BOT_UI;
+  const s = Math.max(0.05, Math.min(aw / c[2], (chh - 2*m) / c[3]));
+  const cx = cw / 2, cy = Math.min(Math.max(TOP_UI + ah / 2, c[3]*s/2 + m), chh - c[3]*s/2 - m);
   st.style.inset = 'auto';
   Object.assign(st.style, {transform: 'none', aspectRatio: 'auto', position: 'absolute', margin: '0', maxWidth: 'none', right: 'auto', bottom: 'auto',
                            width: W*s + 'px', height: H*s + 'px', left: (cx - (c[0] + c[2]/2)*s) + 'px', top: (cy - (c[1] + c[3]/2)*s) + 'px'});
