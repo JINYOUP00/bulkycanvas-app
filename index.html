@@ -280,6 +280,9 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}   /* �
 .rotor.land .adbar{height:48px}
 .rotor.land .adtx span{display:none}
 #say:disabled{opacity:.35}
+/* 작은 붓질 자리 표시: 그리기 전에 동그라미로 '여기' 하고 알려 준 뒤 사라짐 */
+.cv .mk{position:absolute;border-radius:50%;border:2.5px solid #fff;box-shadow:0 0 0 1.5px rgba(20,21,23,.45),0 0 14px rgba(20,21,23,.35),inset 0 0 0 1.5px rgba(20,21,23,.35);opacity:0;transform:translate(-50%,-50%) scale(1.6);transition:opacity .35s ease,transform .5s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.cv .mk.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .cv.lightbg .stl p{background:rgba(22,23,26,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:8px 11px;border-radius:12px;opacity:1}
 
 html,body{height:100%;margin:0}
@@ -422,7 +425,7 @@ function tut(){
   view='tut'; orient();
   $s.innerHTML = `
   <div class="cv" id="cv">
-    <div class="stack" style="aspect-ratio:${D.w}/${D.h}"><img id="pv" alt=""><img id="cu" class="cur" alt="이번 붓질 뒤 그림"><canvas id="dw" class="dw"></canvas><div class="hl" id="hl"></div></div>
+    <div class="stack" style="aspect-ratio:${D.w}/${D.h}"><img id="pv" alt=""><img id="cu" class="cur" alt="이번 붓질 뒤 그림"><canvas id="dw" class="dw"></canvas><div class="hl" id="hl"></div><div class="mk" id="mk"></div></div>
     <div class="gt"></div><div class="gb"></div>
     <div class="hdr"><button class="ib" id="back" aria-label="목록으로">‹</button><span class="ttl"><b>No.${NO}</b> ${D['name' + SUF()]}</span>
       <button class="mini" id="gear" type="button">${tr('brush')}</button><span class="count" id="cnt"></span></div>
@@ -536,21 +539,25 @@ function stateAt(k){
   });
 }
 function patchStroke(k){
-  const st = D.steps[k-1], [bx, by, bw, bh] = st.box, W = D.w;
-  return Promise.all([loadIm(`m${pad(k)}.png`), loadIm(`p${pad(k)}.jpg`)]).then(([mi, pi]) => {
-    const m = pix(mi).data, c = pix(pi).data;
+  const st = D.steps[k-1], [bx, by, bw, bh] = st.box;
+  const ims = [loadIm(`p${pad(k)}.jpg`)];
+  if (st.nf) ims.push(loadIm(`c${pad(k)}.jpg`)); else ims.push(loadIm(`m${pad(k)}.png`));
+  return Promise.all(ims).then(([pi, xi]) => {
+    // 실제 붓질 영상(cNNN.jpg: 붓질 상자 크기 프레임을 세로로 이어 붙임)이 있으면 그대로 재생
+    if (st.nf) return {box: st.box, patch: pi, clip: xi, nf: st.nf, dur: Math.max(400, Math.min(1500, (st.cms || 200) * 2))};   // 실제 프레임을 2배 느리게
+    // 없으면(옛 자료) 칠해진 순서대로 점을 채우는 방식
+    const m = pix(xi).data, c = pix(pi).data;
     const ax = st.ax || [0.5, 0, 0.5, 1], X0 = ax[0]*D.w, Y0 = ax[1]*D.h, dx = (ax[2]-ax[0])*D.w, dy = (ax[3]-ax[1])*D.h, L2 = dx*dx + dy*dy || 1;
     const loc = [], tv = new Float32Array(bw*bh);
     for (let i = 0; i < bw*bh; i++) if (m[i*4+3] > 40) {
       const x = i % bw + bx, y = Math.floor(i / bw) + by;
-      tv[i] = m[i*4] * 2 + Math.max(0, Math.min(1, ((x - X0)*dx + (y - Y0)*dy) / L2));   // 영상에서 먼저 칠한 곳 먼저, 같으면 붓질 방향
+      tv[i] = m[i*4] * 2 + Math.max(0, Math.min(1, ((x - X0)*dx + (y - Y0)*dy) / L2));
       loc.push(i);
     }
     loc.sort((p, q) => tv[p] - tv[q]);
-    const n1 = Math.max(1, loc.length - 1), ord = new Uint32Array(loc.length), t = new Float32Array(loc.length), rgb = new Uint8ClampedArray(loc.length * 3);
-    loc.forEach((i, j) => { ord[j] = (Math.floor(i / bw) + by) * W + (i % bw + bx); t[j] = j / n1; rgb[j*3] = c[i*4]; rgb[j*3+1] = c[i*4+1]; rgb[j*3+2] = c[i*4+2]; });
-    const dur = Math.max(300, Math.min(1400, st.ms ? st.ms : 300 + Math.sqrt(L2)*3.2));
-    return {ord, t, rgb, dur, box: st.box, patch: c};
+    const n1 = Math.max(1, loc.length - 1), t = new Float32Array(loc.length), rgb = new Uint8ClampedArray(loc.length * 3);
+    loc.forEach((i, j) => { t[j] = j / n1; rgb[j*3] = c[i*4]; rgb[j*3+1] = c[i*4+1]; rgb[j*3+2] = c[i*4+2]; });
+    return {box: st.box, patch: pi, ord: new Uint32Array(loc), t, rgb, dur: Math.max(300, Math.min(1400, st.ms || 300 + Math.sqrt(L2)*3.2))};
   });
 }
 function playPatch(my){
@@ -562,25 +569,45 @@ function playPatch(my){
     if (dw.width !== W || dw.height !== H) { dw.width = W; dw.height = H; }
     const x = dw.getContext('2d');
     x.drawImage(bc, 0, 0);
-    const base = x.getImageData(0, 0, W, H);
-    const tot = list.reduce((a, p) => a + p.dur, 0), cap = 6000;
-    if (tot > cap) list.forEach(p => p.dur = Math.max(120, p.dur * cap / tot));
+    const tot = list.reduce((a, p) => a + p.dur, 0), cap = 7000;
+    if (tot > cap) list.forEach(p => p.dur = Math.max(150, p.dur * cap / tot));
     const gap = list.length > 1 ? 80 : 0, hold = 2000;
-    const out = new ImageData(new Uint8ClampedArray(base.data), W, H), d = out.data;
-    const finish = p => { const [bx, by, bw, bh] = p.box; for (let yy = 0; yy < bh; yy++) { const r0 = ((by + yy) * W + bx) * 4, s0 = yy * bw * 4; d.set(p.patch.subarray(s0, s0 + bw*4), r0); } };
-    let i = 0, done = 0, t0 = null, holding = false;
+    // 화면에서 작게 보이는 붓질(가장 긴 쪽 70점 미만)은 그리기 전에 그 자리를 동그라미로 먼저 보여 준다
+    const mk = document.getElementById('mk'), stack = dw.parentElement;
+    const bx0 = Math.min(...list.map(p => p.box[0])), by0 = Math.min(...list.map(p => p.box[1]));
+    const bx1 = Math.max(...list.map(p => p.box[0] + p.box[2])), by1 = Math.max(...list.map(p => p.box[1] + p.box[3]));
+    const scr = (stack.getBoundingClientRect().width || W) / W, ext = Math.max(bx1 - bx0, by1 - by0) * scr;
+    const small = list.length === 1 && ext < 70, markT = small ? 1000 : 0;
+    if (mk) { mk.classList.remove('on');
+      const dia = Math.max(34, ext + 26);
+      Object.assign(mk.style, {left: ((bx0 + bx1) / 2 / W * 100) + '%', top: ((by0 + by1) / 2 / H * 100) + '%', width: dia + 'px', height: dia + 'px'}); }
+    let i = 0, done = 0, t0 = null, holding = false, marking = small, boxData = null;
+    const startStroke = p => { done = 0; boxData = p.clip ? null : x.getImageData(p.box[0], p.box[1], p.box[2], p.box[3]); };
+    startStroke(list[0]);
     const frame = now => {
-      if (my !== drawSeq) return;
-      if (t0 === null) t0 = now;
+      if (my !== drawSeq) { if (mk) mk.classList.remove('on'); return; }
+      if (t0 === null) { t0 = now; if (marking && mk) mk.classList.add('on'); }
       const e = now - t0;
-      if (holding) {
-        if (e >= hold) { d.set(base.data); i = 0; done = 0; holding = false; t0 = now; x.putImageData(out, 0, 0); }
+      if (marking) {
+        if (e >= markT) { marking = false; t0 = now; if (mk) mk.classList.remove('on'); }
+      } else if (holding) {
+        if (e >= hold) { x.drawImage(bc, 0, 0); i = 0; holding = false; t0 = now; startStroke(list[0]);
+          if (small) { marking = true; if (mk) mk.classList.add('on'); } }
       } else {
-        const p = list[i], f = Math.min(1, e / p.dur);
-        while (done < p.ord.length && p.t[done] <= f) { const q = p.ord[done] * 4, r = done * 3; d[q] = p.rgb[r]; d[q+1] = p.rgb[r+1]; d[q+2] = p.rgb[r+2]; done++; }
-        if (e >= p.dur + gap) { finish(p); i++; done = 0; t0 = now; if (i >= list.length) holding = true; }
-        const [bx, by, bw, bh] = p.box;
-        x.putImageData(out, 0, 0, bx, by, bw, bh);
+        const p = list[i], [bx, by, bw, bh] = p.box, f = Math.min(1, e / p.dur);
+        if (p.clip) {           // 실제 영상 프레임
+          const j = Math.min(p.nf - 1, Math.floor(f * p.nf));
+          x.drawImage(p.clip, 0, j * bh, bw, bh, bx, by, bw, bh);
+        } else {
+          const d = boxData.data;
+          while (done < p.ord.length && p.t[done] <= f) { const q = p.ord[done] * 4, r = done * 3; d[q] = p.rgb[r]; d[q+1] = p.rgb[r+1]; d[q+2] = p.rgb[r+2]; done++; }
+          x.putImageData(boxData, bx, by);
+        }
+        if (e >= p.dur + gap) {
+          x.drawImage(p.patch, bx, by);   // 붓질 뒤 그림 그대로
+          i++; t0 = now;
+          if (i >= list.length) holding = true; else startStroke(list[i]);
+        }
       }
       requestAnimationFrame(frame);
     };
