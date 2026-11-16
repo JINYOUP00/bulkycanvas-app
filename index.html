@@ -192,6 +192,7 @@ body{font-size:15px;font-weight:400;letter-spacing:-.01em}
 .stl p{margin:6px 0 0;font-size:12px;font-weight:300;line-height:1.55;opacity:.9;max-width:300px;text-shadow:0 1px 6px rgba(0,0,0,.35)}
 .ov-tools{position:absolute;right:12px;top:42%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px}
 .ov-tools button{width:32px;height:32px;border-radius:50%;font-size:12.5px;font-weight:500;padding:0;display:flex;align-items:center;justify-content:center}
+.ov-tools #replay{font-size:24px;line-height:1}
 .ov-tools #hlb[aria-pressed="false"]{opacity:.5}
 .ov-tools #hide[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
 .sub{position:absolute;left:22px;right:22px;bottom:96px;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;color:#fff;transition:opacity .2s}
@@ -225,6 +226,7 @@ body{font-size:16px;word-break:keep-all;overflow-wrap:anywhere}
 .seg{top:58px}.stl{top:80px}
 .stl span{font-size:13px}.stl p{font-size:13.5px;max-width:310px}
 .ov-tools button{width:36px;height:36px;font-size:13.5px}
+.ov-tools #replay{font-size:27px}
 .meta{font-size:12px;gap:7px}.meta .sw{width:11px;height:11px}
 .sub{bottom:92px;gap:9px;left:20px;right:20px}
 .sub .note{font-size:15.5px;line-height:1.6}
@@ -276,6 +278,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}   /* �
   .adbar{height:46px}
   .adtx span{display:none}
 }
+#say:disabled{opacity:.35}
 
 html,body{height:100%;margin:0}
 body{padding:0!important;background:var(--phone);-webkit-text-size-adjust:100%}
@@ -285,7 +288,7 @@ body{padding:0!important;background:var(--phone);-webkit-text-size-adjust:100%}
 .hdr{top:calc(14px + env(safe-area-inset-top))}.seg{top:calc(58px + env(safe-area-inset-top))}.stl{top:calc(80px + env(safe-area-inset-top))}
 .home{padding-top:calc(40px + env(safe-area-inset-top))}.top{padding-top:calc(18px + env(safe-area-inset-top))}
 .phone{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;min-height:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;margin:0!important}
-@media (min-width:600px){body{background:var(--page)}.wrap{display:flex;justify-content:center;align-items:center}.phone{width:430px!important;height:min(932px,100%)!important;border-radius:28px!important}}
+@media (min-width:600px) and (min-height:600px){body{background:var(--page)}.wrap{display:flex;justify-content:center;align-items:center}.phone{width:430px!important;height:min(932px,100%)!important;border-radius:28px!important}}
 </style>
 
 <div class="wrap">
@@ -329,7 +332,7 @@ function setLang(l){ lang = l; try { localStorage.setItem('lang', l); } catch(e)
 function adText(){ const a = document.getElementById('adT'); if (!a) return; a.textContent = tr('adT'); document.getElementById('adS').textContent = tr('adS'); document.getElementById('adC').textContent = tr('adC'); }
 const $s = document.getElementById('screen');
 const pad = n => String(n).padStart(3,'0');
-let cur = 1, hl = true, view = 'home', ready = false, checks = {}, autoSay = false, unlocked = {};
+let cur = 1, hl = false, view = 'home', ready = false, checks = {}, autoSay = false, unlocked = {};
 const prog = {};
 const canSay = typeof window !== 'undefined' && 'speechSynthesis' in window;
 try { const v = JSON.parse(localStorage.getItem('app') || '{}'); ready = !!v.ready; checks = v.checks || {}; autoSay = !!v.autoSay; unlocked = v.unlocked || {}; Object.assign(prog, v.prog || {}); } catch(e) {}
@@ -425,7 +428,6 @@ function tut(){
     <div class="stl" id="stl"></div>
     <div class="ov-tools">
       <button type="button" id="replay" aria-label="붓질 다시 보기">↻</button>
-      <button type="button" id="hlb" aria-pressed="true" aria-label="강조 켜고 끄기">◎</button>
       <button type="button" id="hide" aria-pressed="false" aria-label="글 숨기기">Aa</button>
     </div>
     <div class="sub" id="subw">
@@ -454,78 +456,85 @@ function tut(){
   const hd = document.getElementById('hide');
   hd.onclick = () => { const on = cv.classList.toggle('bare'); hd.setAttribute('aria-pressed', on); };
   const hb = document.getElementById('hlb');
-  hb.onclick = () => { hl = !hl; hb.setAttribute('aria-pressed', hl); draw(); };
+  if (hb) hb.onclick = () => { hl = !hl; hb.setAttribute('aria-pressed', hl); draw(); };
   $s.querySelectorAll('[data-st]').forEach(b => b.onclick = () => go(stageFirst[+b.dataset.st]));
   let x0 = null;
   cv.addEventListener('pointerdown', e => { if (e.target.closest('button,label')) return; x0 = e.clientX; });
   cv.addEventListener('pointerup', e => { if (x0 === null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) go(cur + (dx < 0 ? 1 : -1)); });
-  draw();
+  draw(); play();
 }
 let wake = null;
 async function keepAwake(){ try { if (navigator.wakeLock && !wake) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); } } catch(e) {} }
 function letSleep(){ try { if (wake) wake.release(); } catch(e) {} wake = null; }
 if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('visibilitychange', () => { if (document.hidden) hush(); else if (view === 'tut') keepAwake(); });
-// 붓질 보여주기: 이번 화면의 붓질을 하나씩, 붓질의 긴 방향을 따라 쓱 그어 보여 준다 (영상 점프컷처럼).
-// 붓질 하나짜리 화면은 두 번, 여러 개 묶인 화면은 한 번 차례로 그린다.
+// 붓질 보여주기: 영상에서 붓이 지나간 순서 그대로(마스크 그림의 밝기 = 칠해진 때) 이번 화면의 붓질을 차례로 그린다.
+// 다 그리면 2초 멈췄다가 처음부터 다시 — 화면을 넘길 때까지 반복. (순서 정보가 없는 옛 그림은 붓질의 긴 방향으로)
 let drawSeq = 0;
 const imgCache = {};
 function loadIm(name){ if (!imgCache[name]) { const im = new Image(); im.src = IM(name); imgCache[name] = (im.decode ? im.decode() : new Promise(r => im.onload = r)).catch(() => {}).then(() => im); } return imgCache[name]; }
+function pix(im){ const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d'); x.drawImage(im, 0, 0); return x.getImageData(0, 0, c.width, c.height); }
+// 붓질 하나 → 칠해지는 점들(먼저 칠해진 순서로)과 그 색
+function strokeData(k, W, H){
+  return Promise.all([loadIm(`m${pad(k)}.png`), loadIm(`s${pad(k)}.jpg`)]).then(([mi, si]) => {
+    const m = pix(mi).data, c = pix(si).data, st = D.steps[k-1] || {};
+    const ax = st.ax || [0.5, 0, 0.5, 1], X0 = ax[0]*W, Y0 = ax[1]*H, dx = (ax[2]-ax[0])*W, dy = (ax[3]-ax[1])*H, L2 = dx*dx + dy*dy || 1;
+    const idx = [];
+    for (let i = 0, n = W*H; i < n; i++) if (m[i*4+3] > 40) idx.push(i);
+    const key = st.tm ? (i => m[i*4] / 254)
+                      : (i => Math.max(0, Math.min(1, (((i % W) - X0)*dx + (Math.floor(i / W) - Y0)*dy) / L2)));
+    const tv = new Float32Array(W*H);
+    idx.forEach(i => tv[i] = key(i));
+    idx.sort((p, q) => tv[p] - tv[q]);
+    const ord = new Uint32Array(idx), t = new Float32Array(idx.length), rgb = new Uint8ClampedArray(idx.length * 3);
+    idx.forEach((i, j) => { t[j] = tv[i]; rgb[j*3] = c[i*4]; rgb[j*3+1] = c[i*4+1]; rgb[j*3+2] = c[i*4+2]; });
+    const dur = Math.max(300, Math.min(1400, st.ms ? st.ms : 300 + Math.sqrt(L2)*3.2));
+    return {ord, t, rgb, dur};
+  });
+}
 function play(){
   const my = ++drawSeq;
   const c = document.getElementById('cu'), dw = document.getElementById('dw'), h = document.getElementById('hl');
   if (!c || !dw || !dw.getContext) return;
   const g = G[cur-1];
-  const show = () => { c.style.visibility = ''; h.style.visibility = ''; dw.getContext('2d').clearRect(0, 0, dw.width, dw.height); };
   const ks = []; for (let k = g.a; k <= g.b; k++) ks.push(k);
   c.style.visibility = 'hidden'; h.style.visibility = 'hidden';
-  Promise.all(ks.map(k => loadIm(`s${pad(k)}.jpg`)).concat([loadIm(`s${pad(g.a-1)}.jpg`)])).then(ims => {
+  const giveUp = () => { if (my === drawSeq) { c.style.visibility = ''; h.style.visibility = ''; } };
+  Promise.all([loadIm(`s${pad(g.a-1)}.jpg`), loadIm(`s${pad(g.b)}.jpg`)]).then(([bi, ei]) => {
     if (my !== drawSeq) return;
-    const before = ims.pop();
-    const W = before.naturalWidth || D.w, H = before.naturalHeight || D.h;
+    const W = bi.naturalWidth || D.w, H = bi.naturalHeight || D.h;
     if (dw.width !== W || dw.height !== H) { dw.width = W; dw.height = H; }
     const x = dw.getContext('2d');
-    const off = document.createElement('canvas'); off.width = W; off.height = H; const o = off.getContext('2d');
-    const many = ks.length > 1;
-    const budget = many ? Math.min(4800, 800 + ks.length * 380) : 0;
-    const plan = ks.map((k, i) => {
-      const st = D.steps[k-1] || {}, ax = st.ax || [0.5, 0, 0.5, 1];
-      const X0 = ax[0]*W, Y0 = ax[1]*H, X1 = ax[2]*W, Y1 = ax[3]*H, L = Math.hypot(X1-X0, Y1-Y0);
-      let dur = Math.max(450, Math.min(1100, 300 + L*3.2));
-      return {k, im: ims[i], prev: i ? ims[i-1] : before, X0, Y0, X1, Y1, dur};
-    });
-    if (many) { const tot = plan.reduce((a, p) => a + p.dur, 0); const f = Math.min(1, budget / tot); plan.forEach(p => p.dur = Math.max(160, p.dur * f)); }
-    const gap = many ? 40 : 0, hold = 450, soft = 0.12;
-    const seq = many ? plan : [plan[0], plan[0]];
-    const ease = t => t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
-    // 안전장치: 화면이 가려져 그리기가 멈춰도 정해진 시간이 지나면 이번 붓질 뒤 그림을 보여 준다
-    const total = seq.reduce((t, p, j) => t + p.dur + ((!many && j === 0) ? hold : gap), 0);
-    setTimeout(() => { if (my === drawSeq && c.style.visibility === 'hidden') { drawSeq++; show(); } }, total + 1500);
-    let i = 0, t0 = null;
-    const frame = now => {
+    const base = pix(bi);
+    x.putImageData(base, 0, 0);
+    return Promise.all(ks.map(k => strokeData(k, W, H))).then(list => {
       if (my !== drawSeq) return;
-      if (t0 === null) t0 = now;
-      const p = seq[i], e = now - t0;
-      const after = (!many && i === 0) ? hold : gap;
-      x.clearRect(0, 0, W, H);
-      x.drawImage(p.prev, 0, 0, W, H);
-      if (e < p.dur) {
-        const head = ease(e / p.dur) * (1 + soft);
-        o.globalCompositeOperation = 'source-over'; o.clearRect(0, 0, W, H); o.drawImage(p.im, 0, 0, W, H);
-        const gr = o.createLinearGradient(p.X0, p.Y0, p.X1, p.Y1);
-        gr.addColorStop(0, '#000');
-        gr.addColorStop(Math.min(1, Math.max(0, head - soft)), '#000');
-        gr.addColorStop(Math.min(1, Math.max(0.0001, head)), 'rgba(0,0,0,0)');
-        gr.addColorStop(1, 'rgba(0,0,0,0)');
-        o.globalCompositeOperation = 'destination-in'; o.fillStyle = gr; o.fillRect(0, 0, W, H);
-        x.drawImage(off, 0, 0);
-      } else {
-        x.drawImage(p.im, 0, 0, W, H);
-        if (e >= p.dur + after) { i++; t0 = now; if (i >= seq.length) { show(); return; } }
-      }
+      const tot = list.reduce((a, p) => a + p.dur, 0), cap = 6000;
+      if (tot > cap) list.forEach(p => p.dur = Math.max(120, p.dur * cap / tot));
+      const gap = list.length > 1 ? 80 : 0, hold = 2000;
+      const endPix = (x.drawImage(ei, 0, 0, W, H), x.getImageData(0, 0, W, H));
+      x.putImageData(base, 0, 0);
+      const out = new ImageData(new Uint8ClampedArray(base.data), W, H);
+      let i = 0, done = 0, t0 = null, holding = false;
+      const frame = now => {
+        if (my !== drawSeq) return;
+        if (t0 === null) t0 = now;
+        const e = now - t0;
+        if (holding) {
+          if (e >= hold) { out.data.set(base.data); i = 0; done = 0; holding = false; t0 = now; x.putImageData(out, 0, 0); }
+        } else {
+          const p = list[i], f = Math.min(1, e / p.dur), d = out.data;
+          while (done < p.ord.length && p.t[done] <= f) { const q = p.ord[done] * 4, r = done * 3; d[q] = p.rgb[r]; d[q+1] = p.rgb[r+1]; d[q+2] = p.rgb[r+2]; done++; }
+          x.putImageData(out, 0, 0);
+          if (e >= p.dur + gap) {
+            i++; done = 0; t0 = now;
+            if (i >= list.length) { out.data.set(endPix.data); x.putImageData(out, 0, 0); holding = true; }
+          }
+        }
+        requestAnimationFrame(frame);
+      };
       requestAnimationFrame(frame);
-    };
-    requestAnimationFrame(frame);
-  });
+    });
+  }).catch(giveUp);
 }
 function go(n){ n = Math.max(1, Math.min(N, n)); if (n === cur) return; cur = n; save(); draw(); play(); if (autoSay) say(); else hush(); }
 // 목소리는 플레이어 하나만 돌려 쓴다 (아이폰 사파리는 새 소리를 만들면 이전 소리가 안 멈추고 겹칠 때가 있음).
@@ -537,8 +546,11 @@ function isSpeaking(){ return speaking || (canSay && speechSynthesis.speaking); 
 function hush(){ seq++; speaking = false; if (player) { try { player.pause(); } catch(e) {} } if (canSay) speechSynthesis.cancel(); sayState(false); }
 function sayState(on){ const b = document.getElementById('say'); if (!b) return; b.setAttribute('aria-pressed', on); b.classList.toggle('on', on);
   document.getElementById('saytx').textContent = on ? tr('speaking') : tr('listen'); b.querySelector('.ic').textContent = on ? '❚❚' : '▶'; }
+// 이번 화면에서 들려줄 말 (단계 첫 화면이면 단계 설명 + 붓질 설명). 설명이 빈 화면은 말 없이 그림만.
+function sayText(){ const s = G[cur-1]; return ((stageFirst[s.stage] === cur ? D.stages[s.stage]['name'+SUF()] + '. ' + D.stages[s.stage]['intro'+SUF()] + ' ' : '') + (s['note'+SUF()] || '')).trim(); }
 function say(){
   hush();
+  if (!sayText()) return;
   const src = VOX(`v${pad(cur)}.mp3`);
   if (src && player) {
     const my = seq;
@@ -551,7 +563,7 @@ function say(){
   }
   if (!canSay) return;
   const s = G[cur-1];
-  const text = (stageFirst[s.stage] === cur ? D.stages[s.stage]['name'+SUF()] + '. ' + D.stages[s.stage]['intro'+SUF()] + ' ' : '') + s['note'+SUF()];
+  const text = sayText();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = tr('tts'); u.rate = 0.95;
   const v = speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith(lang));
@@ -581,10 +593,11 @@ function draw(){
   const dpx = Math.max(3, Math.min(10, s.w*1.1));
   document.getElementById('specs').innerHTML =
     `<span class="en">Ink roll</span><i></i><span class="sw" style="background:${s.hex}"></span>${s['cname'+SUF()]}<i></i><span class="dot" style="width:${dpx}px;height:${dpx}px"></span><span class="en">${s.w}%</span>`;
-  document.getElementById('note').textContent = s['note'+SUF()];
+  document.getElementById('note').textContent = s['note'+SUF()] || '';
+  document.getElementById('say').disabled = !sayText();
   document.getElementById('prev').disabled = cur===1;
   const nx = document.getElementById('next'); nx.disabled = false; nx.classList.toggle('fin', cur === N); nx.textContent = cur === N ? '✓' : '›'; nx.setAttribute('aria-label', cur === N ? tr('finish') : tr('nextA'));
-  if (cur === N) document.getElementById('note').textContent = s['note'+SUF()] + ' ' + tr('doneMsg');
+  if (cur === N) document.getElementById('note').textContent = ((s['note'+SUF()] || '') + ' ' + tr('doneMsg')).trim();
 }
 document.addEventListener('keydown', e => { if (view!=='tut') return; if (e.key==='ArrowRight') go(cur+1); if (e.key==='ArrowLeft') go(cur-1); });
 home();
