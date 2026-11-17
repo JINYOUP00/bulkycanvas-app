@@ -831,8 +831,15 @@ function playPatch(my){
     requestAnimationFrame(frame);
   });
 }
-// 화면 방향: 그리기 화면에서 그림이 가로면 가로, 그 밖에는 세로. 폰 방향과 다르면 돌려 보여 준다.
+// 화면 방향 (2026-11-17 작가 요청): 폰을 눕혀도 앱은 늘 세로 화면 그대로. 그림이 실제로 가로형일 때만 가로 화면으로 돌린다.
+// 웹 페이지는 폰의 자동 회전을 막을 수 없으니, 폰이 눕혀져 브라우저가 가로가 되면 그만큼 거꾸로 돌려 세로처럼 보이게 한다.
+// (예전엔 늘 한쪽(-90도)으로만 돌려, 폰을 반대쪽으로 눕히면 화면이 뒤집혀 보였다)
 let ROT = 0;
+function devAngle(){
+  let a = 90;
+  try { if (screen.orientation && typeof screen.orientation.angle === 'number') a = screen.orientation.angle; else if (typeof window.orientation === 'number') a = window.orientation; } catch(_) {}
+  return ((a % 360) + 360) % 360;
+}
 function orient(){
   const ph = document.getElementById('phone'), ro = document.getElementById('rotor');
   if (!ph || !ro || !ph.clientWidth) return;
@@ -841,12 +848,13 @@ function orient(){
   ro.classList.toggle('land', land);
   const boxLand = W > H;
   if (land === boxLand) { ROT = 0; ro.classList.remove('rot'); ro.style.width = ro.style.height = ro.style.transform = ''; return; }
-  ROT = land ? 90 : -90;
+  // 가로 그림인데 폰이 세로 → 90도 돌려 가로 화면으로 / 세로 내용인데 폰이 눕혀짐 → 폰이 돈 반대로 되돌려 세로 그대로
+  ROT = land ? 90 : (devAngle() === 270 ? 90 : -90);
   ro.classList.add('rot');
   ro.style.width = H + 'px'; ro.style.height = W + 'px';
-  ro.style.transform = land ? 'rotate(90deg) translateY(-100%)' : 'rotate(-90deg) translateX(-100%)';
+  ro.style.transform = ROT === 90 ? 'rotate(90deg) translateY(-100%)' : 'rotate(-90deg) translateX(-100%)';
 }
-if (typeof window !== 'undefined' && window.addEventListener) { window.addEventListener('resize', () => orient()); window.addEventListener('orientationchange', () => setTimeout(orient, 200)); }
+if (typeof window !== 'undefined' && window.addEventListener) { window.addEventListener('resize', () => orient()); window.addEventListener('orientationchange', () => setTimeout(orient, 200)); try { screen.orientation && screen.orientation.addEventListener('change', () => setTimeout(orient, 50)); } catch(_) {} }
 function play(){
   allvUI(false);
   const my = ++drawSeq;
