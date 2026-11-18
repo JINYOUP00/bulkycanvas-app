@@ -629,16 +629,15 @@ function tut(){
     <div class="cbar" id="cbar"><span class="spx" id="specs"></span><span id="cbn"></span><span class="en" id="cbv"></span></div>
     <button class="cfold" id="cfold" type="button" aria-label="색 판 내리기"><svg width="30" height="16.5" viewBox="0 0 40 22" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4l17 14 17-14"/></svg></button>
     <div class="ctl">
-      <div class="mid" id="listen"><button class="pill allv" id="allv" type="button" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg><span id="allvtx">${tr('allv')}</span></button><button class="pill tx" id="hide" type="button" aria-pressed="false" aria-label="글 숨기기">Aa</button><button class="pill" id="say" type="button" aria-pressed="false"><span class="ic" aria-hidden="true">▶</span><span id="saytx">${tr('listen')}</span></button>
-        <button class="pill auto" id="autobtn" type="button" aria-pressed="false"><svg class="hp" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4.5" height="6.5" rx="1.6"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="1.6"/></svg><span id="autotx">${tr('auto')}</span></button></div>
+      <div class="mid" id="listen"><button class="pill allv" id="allv" type="button" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg><span id="allvtx">${tr('allv')}</span></button><button class="pill tx" id="hide" type="button" aria-pressed="false" aria-label="글 숨기기">Aa</button><button class="pill auto" id="autobtn" type="button" aria-pressed="false"><svg class="hp" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4.5" height="6.5" rx="1.6"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="1.6"/></svg><span id="autotx">${tr('listen')}</span></button></div>
     </div>
   </div>`;
   const cv = document.getElementById('cv');
   keepAwake();
   document.getElementById('back').onclick = () => { hush(); letSleep(); home(); };
-  document.getElementById('say').onclick = () => { if (isSpeaking()) hush(); else say(); };
   const ab = document.getElementById('autobtn');
-  const autoUI = () => { ab.setAttribute('aria-pressed', autoSay); ab.classList.toggle('on', autoSay); document.getElementById('autotx').textContent = (innerWidth < 430) ? tr('autoS') : (autoSay ? tr('autoOn') : tr('auto')); };
+  // 2026-11-18 작가 요청: '듣기'와 '자동'이 헷갈림 → 헤드셋 '듣기' 하나. 눌려 있는 동안 목소리가 나온다 (넘길 때마다 그 화면 설명을 읽음)
+  const autoUI = () => { ab.setAttribute('aria-pressed', autoSay); ab.classList.toggle('on', autoSay); ab.setAttribute('aria-label', (lang === 'ko' ? '목소리 ' : 'Voice ') + (autoSay ? (lang === 'ko' ? '켜짐' : 'on') : (lang === 'ko' ? '꺼짐' : 'off'))); document.getElementById('autotx').textContent = tr('listen'); };
   ab.onclick = () => { autoSay = !autoSay; save(); autoUI(); if (autoSay) say(); else hush(); };
   autoUI();
   document.getElementById('prev').onclick = () => go(cur-1);
@@ -1013,10 +1012,23 @@ function playAll(){
   loadIm('base.jpg').then(b => {
     if (my !== drawSeq) return;
     x.drawImage(b, 0, 0);
-    let k = 1, cur1 = get(1), nxt = get(2);
+    let k = 1, cur1 = get(1), nxt = get(2), gShown = -1;
+    // 2026-11-18 작가 요청: 전체 영상 중 설명 자막이 나오는 화면에 오면 그 자막을 읽어 주고, 다 읽을 때까지 영상은 기다렸다가 이어감
+    const waitVoice = go2 => { const t0 = performance.now(), my2 = seq;
+      const w = () => { if (my !== drawSeq) { if (my2 === seq) hush(); return; }
+        if (!isSpeaking() || performance.now() - t0 > 60000) { setTimeout(go2, 250); return; }
+        setTimeout(w, 120); };
+      setTimeout(w, 300); };
     const step = () => {
       if (my !== drawSeq) return;
       if (k > NS) { allvUI(false); return; }          // 끝: 완성 그림에서 멈춤
+      const gi = G.findIndex(g => g.a === k);
+      if (gi >= 0 && gi !== gShown) { gShown = gi; cur = gi + 1; draw();    // 이 화면의 자막·붓질 수·색으로 바꿈
+        if (sayText()) { say(); waitVoice(step2); return; } }
+      step2();
+    };
+    const step2 = () => {
+      if (my !== drawSeq) return;
       cur1.then(p => {
         if (my !== drawSeq) return;
         const st = D.steps[k-1], [bx, by, bw, bh] = p.box, dur = p.clip ? Math.max(20, st.cms || 200) : 250, t0 = performance.now();
@@ -1110,7 +1122,7 @@ function draw(){
   document.getElementById('cbv').textContent = 'RGB ' + rgb.join(' ');
   cb.setAttribute('aria-label', `RGB ${rgb.join(', ')}`);
   document.getElementById('note').textContent = s['note'+SUF()] || '';
-  document.getElementById('say').disabled = !sayText();
+  { const sb = document.getElementById('say'); if (sb) sb.disabled = !sayText(); }
   document.getElementById('prev').disabled = cur===1;
   const nx = document.getElementById('next'); nx.disabled = false; nx.classList.toggle('fin', cur === N); nx.innerHTML = cur === N ? checkSvg : chevR; nx.setAttribute('aria-label', cur === N ? tr('finish') : tr('nextA'));
   if (cur === N) document.getElementById('note').textContent = s['note'+SUF()] ? (s['note'+SUF()] + ' ' + tr('doneMsg')) : tr('doneMsg').replace(/^[—–-]\s*/, '');
