@@ -798,18 +798,19 @@ function drawClip(x, p, j, bx, by, bw, bh){
   x.drawImage(q.im, (jj % p.cols) * q.sw, Math.floor(jj / p.cols) * q.sh, q.sw, q.sh, bx, by, bw, bh);
 }
 // ── 붓질 영상 mp4 (2026-11-18 작가 요청: 사진 묶음은 화질이 깨짐 → 붓질 상자 크기 그대로의 작은 영상) ──
-// 소리 없는 영상(muted·playsinline)은 아이폰에서도 손대지 않고 재생된다. 화면 밖 아주 작은 칸에 붙여 두고, 프레임을 캔버스에 그린다.
+// 소리 없는 영상(muted·playsinline)은 아이폰에서도 손대지 않고 재생된다.
+// 2026-11-18 고침: 화면 밖 아주 작은 칸에 숨겨 두면 아이폰 사파리가 '안 보이는 영상'으로 보고 멈춰 버려 전체 영상이 멈춘 것처럼 보였다
+// → 영상을 붓질 자리(그림 칸 안, 화면 안)에 '보이게' 놓되 캔버스 밑에 깔고, 프레임은 지금처럼 캔버스에 그린다
+//   (영상 칸을 직접 보여 주면 색이 캔버스와 달라 네모 테두리가 보였다).
 const VID_KEEP = 10, vidCache = {}, vidOrder = [];
-let vidHost = null;
 function loadVid(k){
   const key = NO + ':' + k, st = D.steps[k-1];
   if (!vidCache[key]) {
-    if (!vidHost) { vidHost = document.createElement('div'); vidHost.setAttribute('aria-hidden', 'true');
-      vidHost.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;overflow:hidden;opacity:.01;pointer-events:none;z-index:-1'; document.body.appendChild(vidHost); }
     const v = document.createElement('video');
     v.muted = true; v.defaultMuted = true; v.playsInline = true; v.preload = 'auto';
-    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
-    v.src = st.vid; vidHost.appendChild(v);
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.setAttribute('aria-hidden', 'true');
+    v.style.cssText = 'position:absolute;display:none;pointer-events:none;object-fit:fill;margin:0;padding:0;border:0;max-width:none';
+    v.src = st.vid;
     vidCache[key] = v;
   }
   const i = vidOrder.indexOf(key); if (i >= 0) vidOrder.splice(i, 1); vidOrder.push(key);
@@ -817,20 +818,25 @@ function loadVid(k){
     if (v) { try { v.pause(); v.removeAttribute('src'); v.load(); v.remove(); } catch (e) {} } }
   return vidCache[key];
 }
-// 영상 붓질 시작: 처음으로 돌려 rate 배 빠르기로 재생 (재생이 막히면 fail → 붓질 뒤 그림이 서서히 나타남)
+function vidHide(p){ if (p && p.vid) { try { p.vid.pause(); } catch (e) {} p.vid.style.display = 'none'; } }
+// 영상 붓질 시작: 붓질 자리에 놓고 처음부터 rate 배 빠르기로 재생 (재생이 막히면 fail → 붓질 뒤 그림이 서서히 나타남)
 function vidStart(p, rate){
-  const v = p.vid; p.fail = false; p.t0 = performance.now();
+  const v = p.vid, stk = document.querySelector('#cv .stack'), [bx, by] = p.box;
+  p.fail = false; p.t0 = performance.now();
+  if (stk && (v.parentNode !== stk || stk.firstChild !== v)) stk.insertBefore(v, stk.firstChild);   // 맨 아래 = 캔버스 밑
+  Object.assign(v.style, {left: (bx / D.w * 100) + '%', top: (by / D.h * 100) + '%', width: (p.box[2] / D.w * 100) + '%', height: (p.box[3] / D.h * 100) + '%', display: 'block'});
   try { v.pause(); v.currentTime = 0; v.playbackRate = Math.max(0.25, Math.min(4, rate)); } catch (e) {}
   const pr = v.play(); if (pr && pr.catch) pr.catch(() => { p.fail = true; });
 }
-// 지금 프레임을 붓질 상자에 그림. 끝났으면 true
+// 진행 확인 (프레임이 나오기 시작하면 영상을 보이게). 끝났으면 true
 function vidStep(x, p, now){
   const v = p.vid, [bx, by, bw, bh] = p.box, el = now - p.t0;
-  if (p.fail || v.error) { x.globalAlpha = Math.min(1, el / 600); x.drawImage(p.patch, bx, by); x.globalAlpha = 1; return el >= 600; }
+  if (p.fail || v.error) { vidHide(p); x.globalAlpha = Math.min(1, el / 600); x.drawImage(p.patch, bx, by); x.globalAlpha = 1; return el >= 600; }
   if (v.readyState >= 2 && v.currentTime > 0) x.drawImage(v, 0, 0, bw, bh, bx, by, bw, bh);
   const cutT = p.cut ? p.nf / (D.fps || 50) : 0;
-  if (cutT && v.currentTime >= cutT) { v.pause(); return true; }
-  return v.ended || el > p.dur * 2.5 + 3000;    // 너무 오래 걸리면(멈춤) 넘어감
+  if (cutT && v.currentTime >= cutT) { v.pause(); try { x.drawImage(v, 0, 0, bw, bh, bx, by, bw, bh); } catch (e) {} vidHide(p); return true; }
+  if (v.ended || el > p.dur * 2.5 + 3000) { vidHide(p); return true; }    // 너무 오래 걸리면(멈춤) 넘어감
+  return false;
 }
 function patchStroke(k){
   const st = D.steps[k-1], [bx, by, bw, bh] = st.box;
@@ -889,7 +895,7 @@ function playPatch(my){
     const startStroke = p => { done = 0; boxData = (p.clip || p.vid) ? null : x.getImageData(p.box[0], p.box[1], p.box[2], p.box[3]); if (p.vid) vidStart(p, p.real / p.dur); };
     startStroke(list[0]);
     const frame = now => {
-      if (my !== drawSeq) { if (mk) mk.classList.remove('on'); list.forEach(p => { if (p.vid) try { p.vid.pause(); } catch (e) {} }); return; }
+      if (my !== drawSeq) { if (mk) mk.classList.remove('on'); list.forEach(vidHide); return; }
       if (t0 === null) { t0 = now; if (marking && mk) mk.classList.add('on'); }
       const e = now - t0;
       if (marking) {
@@ -1001,6 +1007,7 @@ function play(){
 // 전체 영상: 처음부터 모든 붓질을 실제 속도로 이어서 재생 (2026-11-17 작가 요청)
 function allvUI(on){ const b = document.getElementById('allv'); if (!b) return; b.setAttribute('aria-pressed', on); b.classList.toggle('on', on);
   const t = document.getElementById('allvtx'); if (t) t.textContent = on ? tr('allvStop') : tr('allv');
+  const ic = b.querySelector('svg'); if (ic) ic.innerHTML = on ? '<rect x="6" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor" stroke="none"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor" stroke="none"/>' : '<rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/>';   // 재생 중엔 멈춤(❚❚) 모양
   const cv = document.getElementById('cv'); if (cv) cv.classList.toggle('allplay', on); }
 function playAll(){
   const my = ++drawSeq, dw = document.getElementById('dw');
@@ -1009,10 +1016,13 @@ function playAll(){
   const W = D.w, H = D.h; if (dw.width !== W || dw.height !== H) { dw.width = W; dw.height = H; }
   const x = dw.getContext('2d'), NS = D.steps.length;
   const get = k => k <= NS ? patchStroke(k) : null;
+  // 첫 화면 설명은 누른 그 순간에 바로 읽기 시작 (아이폰은 손가락으로 누른 순간에 시작한 소리만 확실히 나온다 → 이후 소리도 같은 플레이어라 이어서 나옴)
+  let gShown = -1;
+  if (G.length && G[0].a === 1) { gShown = 0; cur = 1; draw(); if (sayText()) say(); }
   loadIm('base.jpg').then(b => {
     if (my !== drawSeq) return;
     x.drawImage(b, 0, 0);
-    let k = 1, cur1 = get(1), nxt = get(2), gShown = -1;
+    let k = 1, cur1 = get(1), nxt = get(2);
     // 2026-11-18 작가 요청: 전체 영상 중 설명 자막이 나오는 화면에 오면 그 자막을 읽어 주고, 다 읽을 때까지 영상은 기다렸다가 이어감
     const waitVoice = go2 => { const t0 = performance.now(), my2 = seq;
       const w = () => { if (my !== drawSeq) { if (my2 === seq) hush(); return; }
@@ -1023,6 +1033,7 @@ function playAll(){
       if (my !== drawSeq) return;
       if (k > NS) { allvUI(false); return; }          // 끝: 완성 그림에서 멈춤
       const gi = G.findIndex(g => g.a === k);
+      if (gi === 0 && k === 1 && isSpeaking()) { waitVoice(step2); return; }   // 누를 때 시작한 첫 설명이 끝나기를 기다림
       if (gi >= 0 && gi !== gShown) { gShown = gi; cur = gi + 1; draw();    // 이 화면의 자막·붓질 수·색으로 바꿈
         if (sayText()) { say(); waitVoice(step2); return; } }
       step2();
@@ -1035,7 +1046,7 @@ function playAll(){
         if (p.vid) {   // 붓질 영상 mp4 — 실제 빠르기
           vidStart(p, 1);
           const fv = now => {
-            if (my !== drawSeq) { try { p.vid.pause(); } catch (e) {} return; }
+            if (my !== drawSeq) { vidHide(p); return; }
             if (!vidStep(x, p, now)) { requestAnimationFrame(fv); return; }
             x.drawImage(p.patch, bx, by);
             k++; cur1 = nxt; nxt = get(k + 1); step();
