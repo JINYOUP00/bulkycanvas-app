@@ -422,6 +422,15 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}   /* �
 .hero .meta .lv span{display:inline-flex;margin:0;opacity:1;font-size:inherit;font-weight:inherit}
 .lock .lv{position:absolute;left:12px;bottom:36px;z-index:1;color:#fff;font-size:11px}
 .lock .lv .d i{width:6px;height:6px}
+/* 2026-11-18 작가 요청: 아래 막대를 내리면 그림만 크게 — 위 판(머리줄·단계 막대·단계 글)은 위로, 아래 판(자막·색 막대·버튼)과 광고 줄은 아래로 빠지고
+   가운데 좌우 화살표와 맨 아래 올리기 꺾쇠만 남는다 */
+.rotor{overflow:hidden}
+.adbar{transition:margin-bottom .3s ease}
+.cv .hdr,.cv .seg,.cv .stl,.cv .gt{transition:transform .3s ease,opacity .3s ease}
+.cv .sub,.cv .gb{transition:transform .3s ease,opacity .3s ease}
+.cv.folded .hdr,.cv.folded .seg,.cv.folded .stl,.cv.folded .gt{transform:translateY(-170px);opacity:0;pointer-events:none}
+.cv.folded .sub,.cv.folded .gb{transform:translateY(140px);opacity:0;pointer-events:none}
+.cv.folded .cbar,.cv.folded .ctl{opacity:0;pointer-events:none}
 
 html,body{height:100%;margin:0}
 body{padding:0!important;background:var(--phone);-webkit-text-size-adjust:100%}
@@ -530,8 +539,10 @@ const checkSvg = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" st
 const lvTag = n => !n ? '' : `<span class="lv" aria-label="${lang==='ko'?'난이도':'Level'} ${n}/5"><span>${lang==='ko'?'난이도':'Level'}</span><span class="d">${[1,2,3,4,5].map(k=>`<i class="${k<=n?'f':''}"></i>`).join('')}</span></span>`;
 const lockSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1zm2 0h6V7a3 3 0 0 0-6 0v3z"/></svg>`;
 const brushSvg = `<svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><g transform="rotate(-35 22 22)"><rect x="6" y="17" width="32" height="10" rx="2" fill="#151515"/></g><path d="M22 6 a16 16 0 0 1 16 16" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M38 22 l-3.5 -4 M38 22 l3.5 -4" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+// 광고 줄을 정확히 제 높이만큼 아래로 빼낸다 (그만큼 그림 칸이 커짐)
+function adHide(v){ const a = document.querySelector('.adbar'); if (a) a.style.marginBottom = v ? -a.offsetHeight + 'px' : ''; }
 function setup(next){
-  view='setup'; orient();
+  view='setup'; adHide(false); orient();
   const done = () => PREP_().filter(p => checks[p[0]]).length;
   $s.innerHTML = `
   <div class="top"><button class="back" id="back" aria-label="목록으로">‹</button><div class="ttl">${tr('setupT')}</div><div class="count" id="pc"></div></div>
@@ -556,7 +567,7 @@ function setup(next){
 }
 
 function home(){
-  view='home'; orient();
+  view='home'; adHide(false); orient();
   $s.innerHTML = `
   <div class="home" style="flex:1;min-height:0">
     <div class="homebar"><b class="appname">${tr('appName')}</b>
@@ -624,7 +635,7 @@ function tut(){
   const avb = document.getElementById('allv');
   if (avb) avb.onclick = () => { if (avb.classList.contains('on')) play(); else { hush(); playAll(); } };
   const cfb = document.getElementById('cfold');
-  const setFold = v => { cv.classList.toggle('folded', v); cfb.setAttribute('aria-label', v ? '색 판 올리기' : '색 판 내리기'); try { localStorage.setItem('cfold', v ? '1' : ''); } catch (e) {} };
+  const setFold = v => { cv.classList.toggle('folded', v); adHide(v); cfb.setAttribute('aria-label', v ? '색 판 올리기' : '색 판 내리기'); try { localStorage.setItem('cfold', v ? '1' : ''); } catch (e) {} };
   let fv = false; try { fv = localStorage.getItem('cfold') === '1'; } catch (e) {}
   setFold(fv);
   cfb.onclick = () => setFold(!cv.classList.contains('folded'));
