@@ -443,6 +443,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}   /* �
 .hdr .brandbk:active{transform:scale(.96)}
 .hdr .ttl{flex:1 1 auto;min-width:0;text-align:right;margin-left:10px}
 .hdr .count{flex:none;padding-left:8px;margin-left:0;border-left:1px solid rgba(255,255,255,.28);line-height:1.1}
+.spx .szl{font-size:11px;font-weight:500;opacity:.85;margin-right:-2px}
 
 html,body{height:100%;margin:0}
 body{padding:0!important;background:var(--phone);-webkit-text-size-adjust:100%}
@@ -1153,7 +1154,7 @@ function draw(){
   document.getElementById('stl').innerHTML = `<span>${tr('stage')(s.stage+1, st['name'+SUF()])}</span>` + (isFirst ? `<p>${st['intro'+SUF()]}</p>` : '');
   const dpx = Math.max(3, Math.min(10, s.w*1.1));
   document.getElementById('specs').innerHTML =
-    `<span class="en">Ink roll</span><span class="dot" style="width:${dpx}px;height:${dpx}px"></span><span class="en">${s.w}%</span>`;
+    `<span class="en">Ink roll</span><span class="dot" style="width:${dpx}px;height:${dpx}px"></span><span class="szl">${lang === 'ko' ? '크기' : 'Size'}</span><span class="en">${+s.w}%</span>`;   // 2026-11-18 작가 요청: '크기' 글자 뒤에 %
   // 지금 색: 아래 긴 막대(가로:세로 15:1) 위에 색 이름과 RGB 값
   const hx = (s.hex || '#888888').replace('#', ''), rgb = [0, 2, 4].map(i => parseInt(hx.slice(i, i + 2), 16));
   const cb = document.getElementById('cbar'), lum = (rgb[0]*299 + rgb[1]*587 + rgb[2]*114) / 1000;
