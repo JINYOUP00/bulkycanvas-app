@@ -383,7 +383,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}   /* �
 .ib.hm{display:flex;align-items:center;justify-content:center;padding:0;flex:none}
 .pill.allv{gap:6px;font-weight:500;min-width:101px;justify-content:center}
 .cbar ~ .ctl .pill.allv.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
-.cv.allplay .sub,.cv.allplay .stl{opacity:0;transition:opacity .2s}
+.cv.allplay .stl{opacity:0;transition:opacity .2s}   /* 2026-11-18: 전체 영상 중 자막(.sub)은 보이게 — 자막을 읽어 주는 동안 화면이 멈춘 것처럼 보였음 */
 /* (8): 화살표 조금 크게. 내렸을 때는 상자 없이 화살표만 — 지금 색으로, 사방에 옅은 어둠 그림자 */
 .cfold{background:transparent !important}
 .cfold svg{width:22px;height:12px}
@@ -470,22 +470,18 @@ const L = {
  ko:{name:'달리는 사람', appName:'따라 그림', brandSub:'붓질 하나씩 따라 그려요', prepT:'시작 전 준비 : 브러시 설정', prepS:'처음 한 번만 · 약 2분', done:'완료 ✓', doIt:'하기 ›',
    cont:n=>`이어서 ${n}번째`, start:'시작하기', meta:n=>`붓질 ${n}번 · 5단계 · 약 25분 · 무료`, more:'다음 그림', unlock:'▶ 광고 보고 열기', adMsg:'시안: 여기서 15초 광고가 나와요',
    setupT:'시작 전 준비', setupH:'한 번만 해 두면 모든 그림에 써요', setupL:'그림마다 다시 설정하지 않아요. 바꾸고 싶을 때는 그리기 화면 위쪽 ‘브러시’를 누르면 언제든 다시 볼 수 있어요.',
-   brushSub:'불투명도 100% · 붓 각도 돌리기', allSet:'준비 끝, 그리기 시작', later:'나중에 하고 바로 그리기', brush:'브러시', stage:(n,s)=>`${n}단계 · ${s}`, auto:'자동 듣기', autoS:'자동', finish:'완성! 목록으로', nextA:'다음 붓질', doneMsg:'— 완성이에요! 정말 멋져요.', loading:'그림 불러오는 중…', loadFail:'불러오지 못했어요. 인터넷 연결을 확인해 주세요.', openIt:'열기 ›',
+   brushSub:'Inking(잉크) 묶음 · 붓 각도 설정', allSet:'준비 끝, 그리기 시작', later:'나중에 하고 바로 그리기', brush:'브러시', stage:(n,s)=>`${n}단계 · ${s}`, auto:'자동 듣기', autoS:'자동', finish:'완성! 목록으로', nextA:'다음 붓질', doneMsg:'— 완성이에요! 정말 멋져요.', loading:'그림 불러오는 중…', loadFail:'불러오지 못했어요. 인터넷 연결을 확인해 주세요.', openIt:'열기 ›',
    adT:'Bulky Canvas 원화 보러 가기', adS:'예시 광고 · 실제로는 구글 광고가 들어가요', adC:'열기', speaking:'멈춤', listen:'듣기', allv:'전체 영상', allvStop:'멈춤', autoOn:'자동 켜짐', tts:'ko-KR',
-   prep:[['brush','Ink roll 브러시 받기','앱에서 받은 브러시 파일을 열면 프로크리에이트에 바로 들어가요. 모든 그림을 이 브러시 하나로 그려요.'],
-     ['studio','브러시 설정 창 열기','브러시 목록에서 Ink roll을 한 번 더 누르면 브러시 스튜디오가 열려요.'],
-     ['angle','붓 각도 돌리기 켜기','왼쪽 메뉴 Shape(모양)에서 Azimuth(방위각)를 켜요. 펜슬을 기울이는 방향으로 붓 끝이 돌아가서, 같은 붓으로 굵은 면과 얇은 선을 다 낼 수 있어요.'],
-     ['opacity','불투명도 100%','화면 왼쪽 아래쪽 막대를 맨 위까지 올려요. 그리는 내내 그대로 둬요.'],
+   prep:[['brush','Ink roll 브러시 고르기','프로크리에이트 브러시 목록에서 Inking(잉크) 묶음을 누르고 그 안의 Ink roll을 골라요. 모든 그림을 이 브러시 하나로 그려요.<br>※ 기기 언어에 따라 묶음·브러시 이름이 다르게 보일 수 있어요.'],
+     ['angle','붓 각도 설정','① 고른 Ink roll을 한 번 더 눌러 브러시 설정 창(브러시 스튜디오)을 열어요.<br>② 왼쪽 메뉴에서 Shape(모양)를 눌러요.<br>③ Azimuth(방위각)를 켜요.<br>④ 오른쪽 위 완료(Done)를 눌러 닫아요.<br>이제 펜슬을 기울이는 방향으로 붓 끝이 돌아가서, 같은 붓으로 굵은 면과 얇은 선을 다 낼 수 있어요.'],
      ['canvas','바탕을 회색으로','새 캔버스 바탕을 회색(#A8A8A8)으로 칠해요. 그림의 검정과 회색이 이 바탕 위에서 잘 보여요.']]},
  en:{name:'Running Figure', appName:'DRAWLLOW', brandSub:'Paint along, one stroke at a time', prepT:'Before you start: Brush setup', prepS:'One time only · about 2 min', done:'Done ✓', doIt:'Set up ›',
    cont:n=>`Continue at ${n}`, start:'Start', meta:n=>`${n} strokes · 5 stages · ~25 min · Free`, more:'More drawings', unlock:'▶ Watch an ad to unlock', adMsg:'Mockup: a 15-second ad plays here',
    setupT:'Before you start', setupH:'Set it once, use it for every drawing', setupL:'You won’t need to set this up again for each drawing. To check it later, tap ‘Brush’ at the top of the painting screen.',
-   brushSub:'Opacity 100% · Rotating brush angle', allSet:'All set — start painting', later:'Skip for now and start', brush:'Brush', stage:(n,s)=>`Stage ${n} · ${s}`, auto:'Auto-play', autoS:'Auto', finish:'Done! Back to list', nextA:'Next stroke', doneMsg:'— You did it! Beautiful work.', loading:'Loading the drawing…', loadFail:'Couldn’t load. Please check your connection.', openIt:'Open ›',
+   brushSub:'Inking set · Brush angle setup', allSet:'All set — start painting', later:'Skip for now and start', brush:'Brush', stage:(n,s)=>`Stage ${n} · ${s}`, auto:'Auto-play', autoS:'Auto', finish:'Done! Back to list', nextA:'Next stroke', doneMsg:'— You did it! Beautiful work.', loading:'Loading the drawing…', loadFail:'Couldn’t load. Please check your connection.', openIt:'Open ›',
    adT:'See Bulky Canvas originals', adS:'Sample ad · real Google ads go here', adC:'Open', speaking:'Stop', listen:'Listen', allv:'Full video', allvStop:'Stop', autoOn:'Auto on', tts:'en-US',
-   prep:[['brush','Get the Ink roll brush','Open the brush file from the app and it goes straight into Procreate. Every drawing uses just this one brush.'],
-     ['studio','Open the Brush Studio','In the brush library, tap Ink roll once more to open the Brush Studio.'],
-     ['angle','Turn on brush rotation','In Shape on the left, turn on Azimuth. The brush tip turns with the way you tilt the Pencil, so one brush gives both broad planes and thin lines.'],
-     ['opacity','Opacity 100%','Slide the lower bar on the left side all the way up and keep it there the whole time.'],
+   prep:[['brush','Choose the Ink roll brush','In Procreate’s brush library, tap the Inking set and choose Ink roll inside it. Every drawing uses just this one brush.<br>※ Set and brush names may look different depending on your device language.'],
+     ['angle','Brush angle setup','① Tap Ink roll once more to open the brush settings (Brush Studio).<br>② Tap Shape in the menu on the left.<br>③ Turn on Azimuth.<br>④ Tap Done at the top right to close it.<br>Now the brush tip turns with the way you tilt the Pencil, so one brush gives both broad planes and thin lines.'],
      ['canvas','Make the canvas gray','Fill a new canvas with gray (#A8A8A8). The blacks and grays of the drawing read well on it.']]}
 };
 let lang = 'en';
@@ -643,7 +639,7 @@ function tut(){
   document.getElementById('prev').onclick = () => go(cur-1);
   document.getElementById('next').onclick = () => { if (cur === N) { hush(); home(); } else go(cur+1); };
   const avb = document.getElementById('allv');
-  if (avb) avb.onclick = () => { if (avb.classList.contains('on')) play(); else { hush(); playAll(); } };
+  if (avb) avb.onclick = () => { if (avb.classList.contains('on')) { hush(); play(); } else { hush(); playAll(); } };
   const cfb = document.getElementById('cfold');
   const setFold = v => { cv.classList.toggle('folded', v); cfb.setAttribute('aria-label', v ? '색 판 올리기' : '색 판 내리기'); try { localStorage.setItem('cfold', v ? '1' : ''); } catch (e) {} };
   let fv = false; try { fv = localStorage.getItem('cfold') === '1'; } catch (e) {}
@@ -822,7 +818,7 @@ function vidHide(p){ if (p && p.vid) { try { p.vid.pause(); } catch (e) {} p.vid
 // 영상 붓질 시작: 붓질 자리에 놓고 처음부터 rate 배 빠르기로 재생 (재생이 막히면 fail → 붓질 뒤 그림이 서서히 나타남)
 function vidStart(p, rate){
   const v = p.vid, stk = document.querySelector('#cv .stack'), [bx, by] = p.box;
-  p.fail = false; p.t0 = performance.now();
+  p.fail = false; p.t0 = performance.now(); p.lastT = -1; p.lastMove = 0; p.retried = false;
   if (stk && (v.parentNode !== stk || stk.firstChild !== v)) stk.insertBefore(v, stk.firstChild);   // 맨 아래 = 캔버스 밑
   Object.assign(v.style, {left: (bx / D.w * 100) + '%', top: (by / D.h * 100) + '%', width: (p.box[2] / D.w * 100) + '%', height: (p.box[3] / D.h * 100) + '%', display: 'block'});
   try { v.pause(); v.currentTime = 0; v.playbackRate = Math.max(0.25, Math.min(4, rate)); } catch (e) {}
@@ -833,6 +829,11 @@ function vidStep(x, p, now){
   const v = p.vid, [bx, by, bw, bh] = p.box, el = now - p.t0;
   if (p.fail || v.error) { vidHide(p); x.globalAlpha = Math.min(1, el / 600); x.drawImage(p.patch, bx, by); x.globalAlpha = 1; return el >= 600; }
   if (v.readyState >= 2 && v.currentTime > 0) x.drawImage(v, 0, 0, bw, bh, bx, by, bw, bh);
+  if (v.currentTime !== p.lastT) { p.lastT = v.currentTime; p.lastMove = now; }
+  if (!p.lastMove) p.lastMove = now;
+  if (!v.ended && now - p.lastMove > 1200) {          // 1.2초 동안 한 장도 안 나아감 = 멈춤
+    if (!p.retried) { p.retried = true; p.lastMove = now; try { const pr = v.play(); if (pr && pr.catch) pr.catch(() => { p.fail = true; }); } catch (e) { p.fail = true; } }
+    else { p.fail = true; p.t0 = now; return false; } }
   const cutT = p.cut ? p.nf / (D.fps || 50) : 0;
   if (cutT && v.currentTime >= cutT) { v.pause(); try { x.drawImage(v, 0, 0, bw, bh, bx, by, bw, bh); } catch (e) {} vidHide(p); return true; }
   if (v.ended || el > p.dur * 2.5 + 3000) { vidHide(p); return true; }    // 너무 오래 걸리면(멈춤) 넘어감
@@ -1024,18 +1025,27 @@ function playAll(){
     x.drawImage(b, 0, 0);
     let k = 1, cur1 = get(1), nxt = get(2);
     // 2026-11-18 작가 요청: 전체 영상 중 설명 자막이 나오는 화면에 오면 그 자막을 읽어 주고, 다 읽을 때까지 영상은 기다렸다가 이어감
-    const waitVoice = go2 => { const t0 = performance.now(), my2 = seq;
+    // 소리가 실제로 흘러가는지(재생 위치가 늘어나는지) 본다 — 아이폰이 소리를 막거나 멈춰 두면 1.5초 뒤 그냥 이어서 재생 (예전엔 최대 60초 멈춰 있었음)
+    const waitVoice = go2 => { const t0 = performance.now(), my2 = seq; let lastT = -1, lastMove = t0;
+      const usePlayer = player && player.src && speaking;
+      const est = Math.min(40000, 1500 + sayText().length * 140);   // 기기 목소리(TTS)일 때 대략 읽는 시간
       const w = () => { if (my !== drawSeq) { if (my2 === seq) hush(); return; }
-        if (!isSpeaking() || performance.now() - t0 > 60000) { setTimeout(go2, 250); return; }
+        const now = performance.now();
+        if (usePlayer) { const ct = player.currentTime || 0; if (ct !== lastT) { lastT = ct; lastMove = now; }
+          const stuck = now - lastMove > 1500, done = !speaking || player.ended || (player.paused && now - t0 > 1500);
+          if (done || stuck || now - t0 > 60000) { setTimeout(go2, 250); return; } }
+        else if (!isSpeaking() || now - t0 > est) { setTimeout(go2, 250); return; }
         setTimeout(w, 120); };
       setTimeout(w, 300); };
+    // 2026-11-18 작가 정정: 말이 붓질보다 먼저 나오지 않게 — 테이크(화면)가 시작되면 붓질 영상과 말이 함께 나오고,
+    // 그 테이크 붓질이 끝났는데 말이 아직이면 말이 끝날 때까지 기다렸다가 다음 테이크로.
     const step = () => {
       if (my !== drawSeq) return;
+      const gi = G.findIndex(g => g.a === k), newG = gi >= 0 && gi !== gShown;
+      if ((newG || k > NS) && k > 1 && isSpeaking()) { waitVoice(step); return; }   // 앞 테이크의 말이 끝나기를 기다림
       if (k > NS) { allvUI(false); return; }          // 끝: 완성 그림에서 멈춤
-      const gi = G.findIndex(g => g.a === k);
-      if (gi === 0 && k === 1 && isSpeaking()) { waitVoice(step2); return; }   // 누를 때 시작한 첫 설명이 끝나기를 기다림
-      if (gi >= 0 && gi !== gShown) { gShown = gi; cur = gi + 1; draw();    // 이 화면의 자막·붓질 수·색으로 바꿈
-        if (sayText()) { say(); waitVoice(step2); return; } }
+      if (newG) { gShown = gi; cur = gi + 1; draw();    // 이 테이크의 자막·붓질 수·색으로 바꾸고, 말은 붓질과 함께 시작
+        if (sayText()) say(); }
       step2();
     };
     const step2 = () => {
