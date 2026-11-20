@@ -498,14 +498,26 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}   /* �
 .drf{margin-top:auto;padding:18px 22px 0;font-size:12px;color:var(--sub);font-family:var(--f-en)}
 .drhow{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:24px}
 .drhow[hidden]{display:none}
-.drhow .hw{background:var(--surface);border-radius:20px;padding:20px 20px 16px;max-width:320px}
-.drhow b{font-size:17px}.drhow p{font-size:14px;line-height:1.7;color:var(--ink);margin:10px 0 16px}
-.drhow .next{width:100%}
+.drhow .hw{background:var(--surface);border-radius:22px;padding:22px 20px 18px;width:100%;max-width:320px;box-sizing:border-box;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.drhow .hwt{display:block;font-size:18px;font-weight:700;margin:0 2px 14px}
+.hwl{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:12px}
+.hwl li{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.55;color:var(--ink)}
+.hwl .hk{flex:none;min-width:34px;height:24px;padding:0 6px;box-sizing:border-box;border-radius:8px;background:rgba(255,255,255,.08);color:var(--accent);font-family:var(--f-en);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:-1px}
+.hwok{display:block;width:100%;height:48px;border:0;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:15px;font-weight:700;cursor:pointer}
+/* 붓 각도 설정 영상 */
+.vidb{display:inline-flex;align-items:center;gap:7px;margin-top:12px;height:38px;padding:0 16px 0 13px;border-radius:999px;border:1px solid var(--accent);background:none;color:var(--accent);font-size:14px;font-weight:600;cursor:pointer}
+.gvid{position:absolute;inset:0;z-index:60;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px}
+.gvbox{width:100%;background:var(--surface);border-radius:20px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+.gvh{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 8px 18px}.gvh b{font-size:16px}
+.gvbox video{display:block;width:100%;aspect-ratio:4/3;background:#000}
+.gvwait{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;background:rgba(0,0,0,.35);color:var(--sub);font-size:14px}
+.gvn{margin:0;padding:12px 18px 16px;font-size:13px;line-height:1.6;color:var(--sub)}
 /* 브러시 설정: 단계마다 깔린 회색 상자 없앰 (가운데 선으로만 나눔) */
 .ol{gap:0}
 .ol li{background:none;border:0;border-radius:0;padding:16px 2px;border-bottom:1px solid var(--line)}
 .ol li:last-child{border-bottom:0}
 .ol li.ok{border-color:var(--line)}
+.ol label small b{display:inline;font-size:inherit;font-weight:600;color:var(--ink)}
 /* 색 판 오른쪽 위: RGB 아래 #색 코드 두 줄 */
 .cbar #cbv{display:flex;flex-direction:column;align-items:flex-end;gap:3px;line-height:1.15}
 .cbar{padding-top:10px}.cbar .spx{top:10px}
@@ -539,16 +551,14 @@ const L = {
    brushSub:'Inking(잉크) 묶음 · 붓 각도 설정', allSet:'준비 끝, 그리기 시작', later:'나중에 하고 바로 그리기', brush:'브러시', stage:(n,s)=>`${n}단계 · ${s}`, auto:'자동 듣기', autoS:'자동', finish:'완성! 목록으로', nextA:'다음 붓질', doneMsg:'— 완성이에요! 정말 멋져요.', loading:'그림 불러오는 중…', loadFail:'불러오지 못했어요. 인터넷 연결을 확인해 주세요.', openIt:'열기 ›',
    adT:'Bulky Canvas 원화 보러 가기', adS:'예시 광고 · 실제로는 구글 광고가 들어가요', adC:'열기', speaking:'멈춤', listen:'듣기', allv:'자동재생', allvStop:'멈춤', autoOn:'자동 켜짐', tts:'ko-KR',
    prep:[['brush','Ink roll 브러시 고르기','프로크리에이트 브러시 목록에서 Inking(잉크) 묶음을 누르고 그 안의 Ink roll을 골라요. 모든 그림을 이 브러시 하나로 그려요.<br>※ 기기 언어에 따라 묶음·브러시 이름이 다르게 보일 수 있어요.'],
-     ['angle','붓 각도 설정','① 고른 Ink roll을 한 번 더 눌러 브러시 설정 창(브러시 스튜디오)을 열어요.<br>② 왼쪽 메뉴에서 Shape(모양)를 눌러요.<br>③ Azimuth(방위각)를 켜요.<br>④ 오른쪽 위 완료(Done)를 눌러 닫아요.<br>이제 펜슬을 기울이는 방향으로 붓 끝이 돌아가서, 같은 붓으로 굵은 면과 얇은 선을 다 낼 수 있어요.'],
-     ['canvas','바탕을 회색으로','새 캔버스 바탕을 회색(#A8A8A8)으로 칠해요. 그림의 검정과 회색이 이 바탕 위에서 잘 보여요.']]},
+     ['angle','붓 각도 설정','① 고른 Ink roll을 한 번 더 눌러 브러시 설정 창(브러시 스튜디오)을 열어요.<br>② 왼쪽 메뉴에서 Shape(모양)를 눌러요.<br>③ <b>Azimuth and barrel roll</b>에 체크해요.<br>④ 오른쪽 위 완료(Done)를 눌러 닫아요.<br>이제 펜슬을 기울이는 방향으로 붓 끝이 돌아가서, 같은 붓으로 굵은 면과 얇은 선을 다 낼 수 있어요.']]},   // 2026-11-20 작가: '바탕을 회색으로' 단계 뺌
  en:{name:'Running Figure', appName:'DRAWLLOW', brandSub:'Paint along, one stroke at a time', prepT:'Before you start: Brush setup', prepS:'One time only · about 2 min', done:'Done ✓', doIt:'Set up ›',
    cont:n=>`Continue at ${n}`, start:'Start', meta:(n,k)=>`${n} strokes · ${k || 5} stages · ~25 min · Free`, more:'More drawings', unlock:'▶ Watch an ad to unlock', adMsg:'Mockup: a 15-second ad plays here',
    setupT:'Before you start', setupH:'Set it once, use it for every drawing', setupL:'You won’t need to set this up again for each drawing. To check it later, tap ‘Brush’ at the top of the painting screen.',
    brushSub:'Inking set · Brush angle setup', allSet:'All set — start painting', later:'Skip for now and start', brush:'Brush', stage:(n,s)=>`Stage ${n} · ${s}`, auto:'Auto-play', autoS:'Auto', finish:'Done! Back to list', nextA:'Next stroke', doneMsg:'— You did it! Beautiful work.', loading:'Loading the drawing…', loadFail:'Couldn’t load. Please check your connection.', openIt:'Open ›',
    adT:'See Bulky Canvas originals', adS:'Sample ad · real Google ads go here', adC:'Open', speaking:'Stop', listen:'Listen', allv:'Auto-play', allvStop:'Pause', autoOn:'Auto on', tts:'en-US',
    prep:[['brush','Choose the Ink roll brush','In Procreate’s brush library, tap the Inking set and choose Ink roll inside it. Every drawing uses just this one brush.<br>※ Set and brush names may look different depending on your device language.'],
-     ['angle','Brush angle setup','① Tap Ink roll once more to open the brush settings (Brush Studio).<br>② Tap Shape in the menu on the left.<br>③ Turn on Azimuth.<br>④ Tap Done at the top right to close it.<br>Now the brush tip turns with the way you tilt the Pencil, so one brush gives both broad planes and thin lines.'],
-     ['canvas','Make the canvas gray','Fill a new canvas with gray (#A8A8A8). The blacks and grays of the drawing read well on it.']]}
+     ['angle','Brush angle setup','① Tap Ink roll once more to open the brush settings (Brush Studio).<br>② Tap Shape in the menu on the left.<br>③ Check <b>Azimuth and barrel roll</b>.<br>④ Tap Done at the top right to close it.<br>Now the brush tip turns with the way you tilt the Pencil, so one brush gives both broad planes and thin lines.']]}
 };
 let lang = 'en';
 try { const sv = localStorage.getItem('lang'); lang = sv || ((navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en'); } catch(e) { lang = (typeof navigator !== 'undefined' && (navigator.language || '').toLowerCase().startsWith('ko')) ? 'ko' : 'en'; }
@@ -632,7 +642,7 @@ function setup(next){
     <p class="lead">${tr('setupL')}</p>
     <div class="brushcard">${brushSvg}<div><b>Ink roll</b><span>${tr('brushSub')}</span></div></div>
     <ol class="ol">${PREP_().map((p,i)=>`<li class="${checks[p[0]]?'ok':''}"><input type="checkbox" id="pp-${p[0]}" ${checks[p[0]]?'checked':''}>
-      <label for="pp-${p[0]}"><b>${i+1}. ${p[1]}</b><small>${p[2]}</small></label></li>`).join('')}</ol>
+      <label for="pp-${p[0]}"><b>${i+1}. ${p[1]}</b><small>${p[2]}</small>${p[0] === 'angle' ? `<button type="button" class="vidb" id="angvid"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>${lang === 'ko' ? '영상으로 보기' : 'Watch the video'}</button>` : ''}</label></li>`).join('')}</ol>
   </div>
   <div class="nav"><button class="next" id="startbtn"></button></div>`;
   const upd = () => {
@@ -643,6 +653,7 @@ function setup(next){
   };
   PREP_().forEach(p => { const c = document.getElementById('pp-'+p[0]); c.onchange = () => { checks[p[0]] = c.checked; c.closest('li').classList.toggle('ok', c.checked); save(); upd(); }; });
   document.getElementById('back').onclick = home;
+  { const vb = document.getElementById('angvid'); if (vb) vb.onclick = e => { e.preventDefault(); e.stopPropagation(); guideVideo('guide/angle.mp4', 'guide/angle.jpg', lang === 'ko' ? '붓 각도 설정' : 'Brush angle setup'); }; }
   document.getElementById('startbtn').onclick = () => { ready = true; save(); (next || home)(); };
   upd();
 }
@@ -694,6 +705,20 @@ function home(){
     b.querySelector('.admsg').textContent = tr('adMsg'); b.classList.add('ad'); b.disabled = true; setTimeout(() => { unlocked[no] = true; save(); openDrawing(no); }, 1200); });
 }
 
+// 2026-11-20 작가 요청: 브러시 설정 '붓 각도 설정'을 실제 화면 영상으로 (작가 화면기록 0~12.5초: 브러시 고르기 → 브러시 스튜디오 → Shape → Azimuth and barrel roll 체크 → 완료)
+function guideVideo(src, poster, title){
+  const ro = document.getElementById('rotor'); if (!ro) return;
+  const old = document.getElementById('gvid'); if (old) old.remove();
+  const d = document.createElement('div'); d.id = 'gvid'; d.className = 'gvid';
+  d.innerHTML = `<div class="gvbox" role="dialog" aria-label="${title}"><div class="gvh"><b>${title}</b><button type="button" class="drx" id="gvx" aria-label="${lang === 'ko' ? '닫기' : 'Close'}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <video src="${src}" poster="${poster}" controls playsinline webkit-playsinline muted loop autoplay preload="auto"></video>
+    <p class="gvn">${lang === 'ko' ? '브러시 목록 → Ink roll을 한 번 더 눌러 브러시 스튜디오 → Shape → Azimuth and barrel roll 체크 → 완료' : 'Brush library → tap Ink roll again for Brush Studio → Shape → check Azimuth and barrel roll → Done'}</p></div>`;
+  ro.appendChild(d);
+  const v = d.querySelector('video'); try { const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); } catch(e) {}
+  v.onerror = () => { const m = document.createElement('div'); m.className = 'gvwait'; m.textContent = lang === 'ko' ? '영상을 준비하고 있어요. 곧 볼 수 있어요.' : 'The video is coming soon.'; v.replaceWith(m); };   // 영상을 아직 안 올렸을 때
+  const close = () => { try { v.pause(); } catch(e) {} d.remove(); };
+  d.onclick = e => { if (e.target === d) close(); }; d.querySelector('#gvx').onclick = close;
+}
 // 2026-11-20 작가 요청: 처음 화면 왼쪽 위 삼선(≡) 메뉴
 function openMenu(lc, lp){
   const ro = document.getElementById('rotor'); if (!ro) return;
@@ -713,9 +738,10 @@ function openMenu(lc, lp){
       ${it('m_ig', ic('<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/>'), ko ? '인스타그램' : 'Instagram', '@bulky_canvas')}
       <div class="drf">Bulky Canvas · ${ko ? '박진엽' : 'Park Jinyoup'}</div>
     </nav>
-    <div class="drhow" id="drhow" hidden><div class="hw"><b>${ko ? '사용법' : 'How to use'}</b>
-      <p>${ko ? '· 그림 좌우의 화살표를 눌러 다음 붓질로 넘겨요.<br>· 손가락으로 그림을 꾹 누르면 완성 그림이 보여요.<br>· 자동재생: 붓질과 설명이 차례로 이어져요. 멈췄다가 다시 누르면 멈춘 곳부터.<br>· 듣기: 설명을 작가 목소리로 들려줘요.<br>· Aa: 글자를 숨기고 그림만 봐요.' : '· Tap the arrows on either side to go to the next stroke.<br>· Press and hold the picture to see the finished painting.<br>· Auto-play: strokes and notes play in order. Pause and tap again to resume.<br>· Listen: hear the notes in the artist\'s voice.<br>· Aa: hide the text and see only the picture.'}</p>
-      <button type="button" class="next" id="howx">${ko ? '알겠어요' : 'Got it'}</button></div></div>`;
+    <div class="drhow" id="drhow" hidden><div class="hw" role="dialog" aria-label="${ko ? '사용법' : 'How to use'}"><b class="hwt">${ko ? '사용법' : 'How to use'}</b>
+      <ul class="hwl">${(ko ? [['‹ ›', '그림 좌우의 화살표로 다음 붓질로 넘겨요.'], ['꾹', '그림을 꾹 누르고 있으면 완성 그림이 보여요.'], ['▶', '자동재생: 붓질과 설명이 차례로 이어져요. 멈췄다가 다시 누르면 멈춘 곳부터.'], ['♪', '듣기: 설명을 작가 목소리로 들려줘요.'], ['Aa', '글자를 숨기고 그림만 봐요.']]
+        : [['‹ ›', 'Tap the arrows on either side for the next stroke.'], ['Hold', 'Press and hold the picture to see the finished painting.'], ['▶', 'Auto-play: strokes and notes play in order. Pause, then tap again to resume.'], ['♪', 'Listen: hear the notes in the artist\'s voice.'], ['Aa', 'Hide the text and see only the picture.']]).map(r => `<li><span class="hk">${r[0]}</span><span>${r[1]}</span></li>`).join('')}</ul>
+      <button type="button" class="hwok" id="howx">${ko ? '알겠어요' : 'Got it'}</button></div></div>`;
   ro.appendChild(d);
   void d.offsetWidth; d.classList.add('on');
   const close = () => { d.classList.remove('on'); setTimeout(() => d.remove(), 220); };
