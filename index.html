@@ -507,10 +507,10 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}   /* �
 /* 붓 각도 설정 영상 */
 .vidb{display:inline-flex;align-items:center;gap:7px;margin-top:12px;height:38px;padding:0 16px 0 13px;border-radius:999px;border:1px solid var(--accent);background:none;color:var(--accent);font-size:14px;font-weight:600;cursor:pointer}
 .gvid{position:absolute;inset:0;z-index:60;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px}
-.gvbox{width:100%;background:var(--surface);border-radius:20px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+.gvbox{width:min(100%, calc((100dvh - 200px) * 9 / 16));background:var(--surface);border-radius:20px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.5)}
 .gvh{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 8px 18px}.gvh b{font-size:16px}
-.gvbox video{display:block;width:100%;aspect-ratio:4/3;background:#000}
-.gvwait{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;background:rgba(0,0,0,.35);color:var(--sub);font-size:14px}
+.gvbox video{display:block;width:100%;aspect-ratio:9/16;background:#000;object-fit:contain}
+.gvwait{aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;background:rgba(0,0,0,.35);color:var(--sub);font-size:14px}
 .gvn{margin:0;padding:12px 18px 16px;font-size:13px;line-height:1.6;color:var(--sub)}
 /* 브러시 설정: 단계마다 깔린 회색 상자 없앰 (가운데 선으로만 나눔) */
 .ol{gap:0}
