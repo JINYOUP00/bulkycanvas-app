@@ -659,7 +659,8 @@ function home(){
   if (lvSel === 1) lvSel = 2;
   if (lvSel && !has(lvSel)) lvSel = 0;
   const lc = CAT.find(x => x.no === lastNo()) || CAT[0], lp = prog[lc.no] || 1;
-  const list = CAT.filter(c => lvMatch(lvSel, c.level));
+  // 2026-11-20 작가 요청: 쉬운 그림부터 어려운 그림 순으로 (같은 난이도는 번호 순)
+  const list = CAT.filter(c => lvMatch(lvSel, c.level)).sort((a, b) => (a.level || 9) - (b.level || 9) || a.no - b.no);
   $s.innerHTML = `
   <div class="home ig" style="flex:1;min-height:0">
     <div class="homebar hb3">
