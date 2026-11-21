@@ -385,8 +385,12 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}   /* �
 .cbar ~ .ctl .mid > #allv{flex:1.3 1 0;min-width:0}
 .cbar ~ .ctl .mid > #say,.cbar ~ .ctl .mid > #autobtn{flex:1 1 0;min-width:0}
 .cbar ~ .ctl .mid > #hide{flex:none;width:46px;padding:0}
+/* 2026-11-21 작가 요청: 되감기 · 재생/멈춤 · Aa · 헤드폰 — 아이콘만, 네 버튼 같은 크기 */
+.cbar ~ .ctl .mid > #rst,.cbar ~ .ctl .mid > #allv,.cbar ~ .ctl .mid > #hide,.cbar ~ .ctl .mid > #autobtn{flex:1 1 0 !important;width:auto !important;min-width:0 !important;padding:0 !important;justify-content:center}
+.cbar ~ .ctl .mid > .pill [hidden]{display:none !important}
+.cbar ~ .ctl .mid > .pill > svg{width:22px;height:22px}.cbar ~ .ctl .mid > #autobtn > svg{width:23px;height:23px;stroke-width:2.2}.cbar ~ .ctl .mid > #hide{font-size:17px}   /* 2026-11-21 작가 요청: 자동재생 왼쪽 '처음부터' */
 .sub{left:16px;right:16px;bottom:122px}
-@media (max-width:359px){.cbar ~ .ctl{left:12px;right:12px;bottom:12px}.cbar .spx{left:12px}.cbar{padding-left:12px;padding-right:12px}.cbar ~ .ctl .mid{gap:6px}.cbar ~ .ctl .mid > #hide{width:40px}}
+@media (max-width:359px){.cbar ~ .ctl{left:12px;right:12px;bottom:12px}.cbar .spx{left:12px}.cbar{padding-left:12px;padding-right:12px}.cbar ~ .ctl .mid{gap:6px}}
 .ib.hm{display:flex;align-items:center;justify-content:center;padding:0;flex:none}
 .pill.allv{gap:6px;font-weight:500;min-width:101px;justify-content:center}
 .cbar ~ .ctl .pill.allv.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
@@ -556,14 +560,14 @@ const L = {
    cont:n=>`이어서 ${n}번째`, start:'시작하기', meta:(n,k)=>`붓질 ${n}번 · ${k === 1 ? '' : (k || 5) + '단계 · '}약 25분 · 무료`, more:'다음 그림', unlock:'▶ 광고 보고 열기', adMsg:'시안: 여기서 15초 광고가 나와요',
    setupT:'시작 전 준비', setupH:'한 번만 해 두면 모든 그림에 써요', setupL:'그림마다 다시 설정하지 않아요. 바꾸고 싶을 때는 그리기 화면 위쪽 ‘브러시’를 누르면 언제든 다시 볼 수 있어요.',
    brushSub:'Inking(잉크) 묶음 · 붓 각도 설정', allSet:'준비 끝, 그리기 시작', later:'나중에 하고 바로 그리기', brush:'브러시', stage:(n,s)=>`${n}단계 · ${s}`, auto:'자동 듣기', autoS:'자동', finish:'완성! 목록으로', nextA:'다음 붓질', doneMsg:'— 완성이에요! 정말 멋져요.', loading:'그림 불러오는 중…', loadFail:'불러오지 못했어요. 인터넷 연결을 확인해 주세요.', openIt:'열기 ›',
-   adT:'Bulky Canvas 원화 보러 가기', adS:'예시 광고 · 실제로는 구글 광고가 들어가요', adC:'열기', speaking:'멈춤', listen:'듣기', allv:'자동재생', allvStop:'멈춤', autoOn:'자동 켜짐', tts:'ko-KR',
+   adT:'Bulky Canvas 원화 보러 가기', adS:'예시 광고 · 실제로는 구글 광고가 들어가요', adC:'열기', speaking:'멈춤', listen:'듣기', allv:'자동재생', rst:'처음부터', allvStop:'멈춤', autoOn:'자동 켜짐', tts:'ko-KR',
    prep:[['brush','Ink roll 브러시 고르기','프로크리에이트 브러시 목록에서 Inking(잉크) 묶음을 누르고 그 안의 Ink roll을 골라요. 모든 그림을 이 브러시 하나로 그려요.<br>※ 기기 언어에 따라 묶음·브러시 이름이 다르게 보일 수 있어요.'],
      ['angle','붓 각도 설정','① 고른 Ink roll을 한 번 더 눌러 브러시 설정 창(브러시 스튜디오)을 열어요.<br>② 왼쪽 메뉴에서 Shape(모양)를 눌러요.<br>③ <b>Azimuth and barrel roll</b>에 체크해요.<br>④ 오른쪽 위 완료(Done)를 눌러 닫아요.<br>이제 펜슬을 기울이는 방향으로 붓 끝이 돌아가서, 같은 붓으로 굵은 면과 얇은 선을 다 낼 수 있어요.']]},   // 2026-11-20 작가: '바탕을 회색으로' 단계 뺌
  en:{name:'Running Figure', appName:'DRAWLLOW', brandSub:'Paint along, one stroke at a time', prepT:'Before you start: Brush setup', prepS:'One time only · about 2 min', done:'Done ✓', doIt:'Set up ›',
    cont:n=>`Continue at ${n}`, start:'Start', meta:(n,k)=>`${n} strokes · ${k === 1 ? '' : (k || 5) + ' stages · '}~25 min · Free`, more:'More drawings', unlock:'▶ Watch an ad to unlock', adMsg:'Mockup: a 15-second ad plays here',
    setupT:'Before you start', setupH:'Set it once, use it for every drawing', setupL:'You won’t need to set this up again for each drawing. To check it later, tap ‘Brush’ at the top of the painting screen.',
    brushSub:'Inking set · Brush angle setup', allSet:'All set — start painting', later:'Skip for now and start', brush:'Brush', stage:(n,s)=>`Stage ${n} · ${s}`, auto:'Auto-play', autoS:'Auto', finish:'Done! Back to list', nextA:'Next stroke', doneMsg:'— You did it! Beautiful work.', loading:'Loading the drawing…', loadFail:'Couldn’t load. Please check your connection.', openIt:'Open ›',
-   adT:'See Bulky Canvas originals', adS:'Sample ad · real Google ads go here', adC:'Open', speaking:'Stop', listen:'Listen', allv:'Auto-play', allvStop:'Pause', autoOn:'Auto on', tts:'en-US',
+   adT:'See Bulky Canvas originals', adS:'Sample ad · real Google ads go here', adC:'Open', speaking:'Stop', listen:'Listen', allv:'Auto-play', rst:'From the start', allvStop:'Pause', autoOn:'Auto on', tts:'en-US',
    prep:[['brush','Choose the Ink roll brush','In Procreate’s brush library, tap the Inking set and choose Ink roll inside it. Every drawing uses just this one brush.<br>※ Set and brush names may look different depending on your device language.'],
      ['angle','Brush angle setup','① Tap Ink roll once more to open the brush settings (Brush Studio).<br>② Tap Shape in the menu on the left.<br>③ Check <b>Azimuth and barrel roll</b>.<br>④ Tap Done at the top right to close it.<br>Now the brush tip turns with the way you tilt the Pencil, so one brush gives both broad planes and thin lines.']]}
 };
@@ -786,7 +790,7 @@ function tut(){
     <div class="cbar" id="cbar"><span class="spx" id="specs"></span><span id="cbn"></span><span class="en" id="cbv"></span></div>
     <button class="cfold" id="cfold" type="button" aria-label="색 판 내리기"><svg width="30" height="16.5" viewBox="0 0 40 22" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4l17 14 17-14"/></svg></button>
     <div class="ctl">
-      <div class="mid" id="listen"><button class="pill allv" id="allv" type="button" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg><span id="allvtx">${tr('allv')}</span></button><button class="pill tx" id="hide" type="button" aria-pressed="false" aria-label="글 숨기기">Aa</button><button class="pill auto" id="autobtn" type="button" aria-pressed="false"><svg class="hp" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4.5" height="6.5" rx="1.6"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="1.6"/></svg><span id="autotx">${tr('listen')}</span></button></div>
+      <div class="mid" id="listen"><button class="pill rst" id="rst" type="button" aria-label="${tr('rst')}" title="${tr('rst')}"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 6.5L4 12l7.5 5.5z" fill="currentColor"/><path d="M20 6.5L12.5 12l7.5 5.5z" fill="currentColor"/></svg></button><button class="pill allv" id="allv" type="button" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg><span id="allvtx" hidden>${tr('allv')}</span></button><button class="pill tx" id="hide" type="button" aria-pressed="false" aria-label="글 숨기기">Aa</button><button class="pill auto" id="autobtn" type="button" aria-pressed="false"><svg class="hp" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4.5" height="6.5" rx="1.6"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="1.6"/></svg><span id="autotx" hidden>${tr('listen')}</span></button></div>
     </div>
   </div>`;
   const cv = document.getElementById('cv');
@@ -800,6 +804,10 @@ function tut(){
   document.getElementById('prev').onclick = () => go(cur-1);
   document.getElementById('next').onclick = () => { if (cur === N) { hush(); home(); } else go(cur+1); };
   const avb = document.getElementById('allv');
+  // 2026-11-21 작가 요청: '처음부터' = 그림을 첫 화면(첫 붓질)으로. 자동재생 중이면 처음부터 다시 자동재생
+  const rsb = document.getElementById('rst');
+  if (rsb) rsb.onclick = () => { track('restart', {drawing_no: NO, screen: cur}); const was = avb && avb.classList.contains('on'); allPos = null;
+    if (was) { pauseAll(); cur = 1; save(); draw(); playAll(); } else if (cur === 1) { hush(); if (autoSay && sayText()) say(); play(); } else go(1); };
   if (avb) avb.onclick = () => { if (avb.classList.contains('on')) { track('autoplay_pause', {drawing_no: NO, screen: cur}); pauseAll(); } else { track('autoplay_start', {drawing_no: NO, screen: cur}); hush(); playAll(); } };
   const cfb = document.getElementById('cfold');
   const setFold = v => { cv.classList.toggle('folded', v); cfb.setAttribute('aria-label', v ? '색 판 올리기' : '색 판 내리기'); try { localStorage.setItem('cfold', v ? '1' : ''); } catch (e) {} };
@@ -997,8 +1005,8 @@ function play(){
 }
 // 전체 영상: 처음부터 모든 붓질을 실제 속도로 이어서 재생 (2026-11-17 작가 요청)
 function allvUI(on){ const b = document.getElementById('allv'); if (!b) return; b.setAttribute('aria-pressed', on); b.classList.toggle('on', on);
-  const t = document.getElementById('allvtx'); if (t) t.textContent = on ? tr('allvStop') : tr('allv');
-  const ic = b.querySelector('svg'); if (ic) ic.innerHTML = on ? '<rect x="6" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor" stroke="none"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor" stroke="none"/>' : '<rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10 9l5 3-5 3z" fill="currentColor"/>';   // 재생 중엔 멈춤(❚❚) 모양
+  const t = document.getElementById('allvtx'); if (t) t.textContent = on ? tr('allvStop') : tr('allv'); b.setAttribute('aria-label', on ? tr('allvStop') : tr('allv'));
+  const ic = b.querySelector('svg'); if (ic) ic.innerHTML = on ? '<rect x="6" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor" stroke="none"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor" stroke="none"/>' : '<path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/>';   // 재생 중엔 멈춤(❚❚) 모양
   const cv = document.getElementById('cv'); if (cv) cv.classList.toggle('allplay', on); }
 // 2026-11-18 작가 요청: '전체 영상' → '자동재생'. 멈췄다가 다시 누르면 처음부터가 아니라 멈춘 곳부터 이어서.
 // allPos: 멈춘 자리 (그림 번호, 붓질 번호, 그때 화면, 목소리 읽던 중이었는지). 멈춘 뒤 다른 화면으로 넘겼으면 그 화면 처음부터.
